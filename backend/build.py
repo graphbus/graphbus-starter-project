@@ -26,41 +26,34 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from graphbus_core.auth import ensure_api_key
+from graphbus_core.auth import ensure_api_key, check_llm_key, get_configured_model
 
 # ---------------------------------------------------------------------------
 # Gate 1 — GraphBus API key (interactive onboarding if not configured)
 # ---------------------------------------------------------------------------
 
-GRAPHBUS_API_KEY = ensure_api_key(required=True)
+GRAPHBUS_API_KEY = ensure_api_key()
 print(f"✓  GraphBus API key ({GRAPHBUS_API_KEY[:8]}…)")
 
 
 # ---------------------------------------------------------------------------
-# Gate 2 — LLM provider key
+# Gate 2 — LLM provider key (checked in env, never stored)
 # ---------------------------------------------------------------------------
 
-LLM_KEYS = {
-    "DEEPSEEK_API_KEY": "deepseek-reasoner (recommended)",
-    "ANTHROPIC_API_KEY": "claude-sonnet",
-    "OPENROUTER_API_KEY": "any model via OpenRouter",
-    "OPENAI_API_KEY": "gpt-4o",
-}
+llm_found, llm_env_var, llm_model = check_llm_key()
 
-active_llm_key = next((k for k in LLM_KEYS if os.getenv(k, "").strip()), None)
-
-if not active_llm_key:
+if not llm_found:
     print(
-        "\n"
-        "⚠️  No LLM API key found — Build Mode requires one.\n"
-        "   Add one of these to your .env file:\n"
-        + "".join(f"     {k}=...   # {desc}\n" for k, desc in LLM_KEYS.items())
-        + "\n   Docs: https://graphbus.com/docs/build-mode\n",
+        f"\n⚠️  {llm_env_var} not found in environment.\n"
+        f"   Your configured model requires it:\n"
+        f"     export {llm_env_var}=your_key_here\n"
+        f"\n   To change your model preference, run: graphbus auth login\n"
+        f"   Docs: https://graphbus.com/docs/build-mode\n",
         file=sys.stderr,
     )
     sys.exit(1)
 
-print(f"✓  LLM provider: {LLM_KEYS[active_llm_key]}")
+print(f"✓  LLM model: {llm_model}  (via {llm_env_var})")
 
 
 # ---------------------------------------------------------------------------
@@ -79,9 +72,11 @@ def main() -> None:
         print(f"✗  graphbus not installed: {exc}\n   Run: pip install graphbus", file=sys.stderr)
         sys.exit(1)
 
+    from graphbus_core.config import LLMConfig
     config = BuildConfig(
         root_package="agents",
         output_dir=".graphbus",
+        llm_config=LLMConfig(model=llm_model),
     )
 
     print(f"\n{'DRY RUN — ' if args.dry_run else ''}Starting negotiation cycle…")
