@@ -3,8 +3,14 @@
 from __future__ import annotations
 
 import logging
+import os
+import sys
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
+
+# Load .env before any env-var reads
+from dotenv import load_dotenv
+load_dotenv()
 
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,6 +23,23 @@ from run import auth_agent, notification_agent, registration_agent, task_agent
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+GRAPHBUS_API_KEY = os.getenv("GRAPHBUS_API_KEY", "").strip()
+if not GRAPHBUS_API_KEY:
+    print(
+        "\n"
+        "╔══════════════════════════════════════════════════════════════╗\n"
+        "║          GRAPHBUS_API_KEY is required to run this app        ║\n"
+        "╠══════════════════════════════════════════════════════════════╣\n"
+        "║  1. Sign up (free) at https://graphbus.com/onboarding        ║\n"
+        "║  2. Copy your API key                                        ║\n"
+        "║  3. Add it to your .env file:                                ║\n"
+        "║        GRAPHBUS_API_KEY=gb_...                               ║\n"
+        "║  4. Restart: docker-compose up  (or uvicorn main:app)        ║\n"
+        "╚══════════════════════════════════════════════════════════════╝\n",
+        file=sys.stderr,
+    )
+    raise SystemExit(1)
 
 
 # ---------- lifespan ----------
@@ -37,8 +60,6 @@ app = FastAPI(
 )
 
 # CORS
-import os
-
 cors_origins = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
 app.add_middleware(
     CORSMiddleware,

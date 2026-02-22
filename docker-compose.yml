@@ -8,6 +8,7 @@ services:
     ports:
       - "8000:8000"
     environment:
+      - GRAPHBUS_API_KEY=${GRAPHBUS_API_KEY:?GRAPHBUS_API_KEY is required — get yours at https://graphbus.com/onboarding}
       - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
       - DATABASE_URL=sqlite:///./data/graphbus.db
       - CORS_ORIGINS=http://localhost:3000

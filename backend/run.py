@@ -10,7 +10,7 @@ from __future__ import annotations
 import inspect
 import logging
 
-from graphbus_core_mock import MessageBus
+from graphbus_core.runtime.message_bus import MessageBus
 
 logger = logging.getLogger(__name__)
 

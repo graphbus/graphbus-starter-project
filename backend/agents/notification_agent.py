@@ -9,7 +9,8 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from graphbus_core_mock import GraphBusNode, MessageBus, subscribe
+from graphbus_core import GraphBusNode, subscribe
+from graphbus_core.runtime.message_bus import MessageBus
 
 logger = logging.getLogger(__name__)
 

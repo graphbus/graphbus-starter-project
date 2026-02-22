@@ -10,7 +10,8 @@ from typing import Any
 
 from sqlalchemy.orm import Session
 
-from graphbus_core_mock import GraphBusNode, MessageBus, schema_method, subscribe
+from graphbus_core import GraphBusNode, schema_method, subscribe
+from graphbus_core.runtime.message_bus import MessageBus
 
 
 class TaskManagerAgent(GraphBusNode):

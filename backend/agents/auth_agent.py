@@ -12,7 +12,8 @@ from typing import Any
 
 from sqlalchemy.orm import Session
 
-from graphbus_core_mock import GraphBusNode, MessageBus, depends_on, schema_method, subscribe
+from graphbus_core import GraphBusNode, depends_on, schema_method, subscribe
+from graphbus_core.runtime.message_bus import MessageBus
 
 
 class UserRegistrationAgent(GraphBusNode):
