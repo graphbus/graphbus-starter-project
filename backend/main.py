@@ -24,22 +24,29 @@ from run import auth_agent, notification_agent, registration_agent, task_agent
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-GRAPHBUS_API_KEY = os.getenv("GRAPHBUS_API_KEY", "").strip()
-if not GRAPHBUS_API_KEY:
-    print(
-        "\n"
-        "╔══════════════════════════════════════════════════════════════╗\n"
-        "║          GRAPHBUS_API_KEY is required to run this app        ║\n"
-        "╠══════════════════════════════════════════════════════════════╣\n"
-        "║  1. Sign up (free) at https://graphbus.com/onboarding        ║\n"
-        "║  2. Copy your API key                                        ║\n"
-        "║  3. Add it to your .env file:                                ║\n"
-        "║        GRAPHBUS_API_KEY=gb_...                               ║\n"
-        "║  4. Restart: docker-compose up  (or uvicorn main:app)        ║\n"
-        "╚══════════════════════════════════════════════════════════════╝\n",
-        file=sys.stderr,
-    )
-    raise SystemExit(1)
+from graphbus_core.auth import ensure_api_key as _ensure_api_key, get_api_key as _get_api_key
+
+# Gate: GraphBus API key required.
+# - Interactive terminal (local dev): runs the onboarding prompt if no key found.
+# - Non-interactive (Docker/CI): prints a clear error and exits.
+if sys.stdin.isatty():
+    GRAPHBUS_API_KEY = _ensure_api_key(required=True)
+else:
+    GRAPHBUS_API_KEY = _get_api_key()
+    if not GRAPHBUS_API_KEY:
+        print(
+            "\n"
+            "╔══════════════════════════════════════════════════════════════╗\n"
+            "║          GRAPHBUS_API_KEY is required to run this app        ║\n"
+            "╠══════════════════════════════════════════════════════════════╣\n"
+            "║  Get your free key at https://graphbus.com/onboarding        ║\n"
+            "║  Then add it to your environment:                            ║\n"
+            "║        GRAPHBUS_API_KEY=gb_...                               ║\n"
+            "║  Or add it to .env and restart.                              ║\n"
+            "╚══════════════════════════════════════════════════════════════╝\n",
+            file=sys.stderr,
+        )
+        raise SystemExit(1)
 
 
 # ---------- lifespan ----------

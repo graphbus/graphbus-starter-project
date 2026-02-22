@@ -26,28 +26,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+from graphbus_core.auth import ensure_api_key
 
 # ---------------------------------------------------------------------------
-# Gate 1 — GraphBus API key
+# Gate 1 — GraphBus API key (interactive onboarding if not configured)
 # ---------------------------------------------------------------------------
 
-GRAPHBUS_API_KEY = os.getenv("GRAPHBUS_API_KEY", "").strip()
-if not GRAPHBUS_API_KEY:
-    print(
-        "\n"
-        "╔══════════════════════════════════════════════════════════════╗\n"
-        "║          GRAPHBUS_API_KEY is required for Build Mode         ║\n"
-        "╠══════════════════════════════════════════════════════════════╣\n"
-        "║  1. Sign up (free) at https://graphbus.com/onboarding        ║\n"
-        "║  2. Copy your API key                                        ║\n"
-        "║  3. Add it to your .env file:                                ║\n"
-        "║        GRAPHBUS_API_KEY=gb_...                               ║\n"
-        "╚══════════════════════════════════════════════════════════════╝\n",
-        file=sys.stderr,
-    )
-    sys.exit(1)
-
-print(f"✓  GraphBus API key found ({GRAPHBUS_API_KEY[:8]}…)")
+GRAPHBUS_API_KEY = ensure_api_key(required=True)
+print(f"✓  GraphBus API key ({GRAPHBUS_API_KEY[:8]}…)")
 
 
 # ---------------------------------------------------------------------------
